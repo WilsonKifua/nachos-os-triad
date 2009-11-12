@@ -44,8 +44,13 @@ public class ThreadedKernel extends Kernel {
      */	
     public void selfTest() {
         System.out.println("\n*** Nachos Kernel Successfull Started ***\n");
+//<<<<<<< .mine
+	//KThread.simpleSelfTest();
+	KThread.selfTest();
+//=======
 	KThread.simpleSelfTest();
 	KThread.selfTest();
+//>>>>>>> .r3
 	//Semaphore.selfTest();
         //Condition.selfTest();
         //Condition2.selfTest();
