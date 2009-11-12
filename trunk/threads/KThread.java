@@ -33,6 +33,7 @@ public class KThread {
      *
      * @return	the current thread.
      */
+     Lock mutex = new Lock();
     public static KThread currentThread() {
 	Lib.assertTrue(currentThread != null);
 	return currentThread;
@@ -273,10 +274,20 @@ public class KThread {
      * thread.
      */
     public void join() {
-	Lib.debug(dbgThread, "Joining to thread: " + toString());
 
-	Lib.assertTrue(this != currentThread);
+        mutex.acquire();
+        Lib.debug(dbgThread, "Joining to thread: " + toString());
+        int i=0;
+        if(this.status == statusFinished){
+            mutex.release();
+            return;
+        }
+        else{
+            yield();       
+        }
+        mutex.release();
 
+	    Lib.assertTrue(this != currentThread);
     }
 
     /**
