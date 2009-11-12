@@ -28,8 +28,10 @@ public class Alarm {
      */
     public void timerInterrupt() {
 	Lib.debug(dbgAlarm,"In Interrupt Handler (time = "+Machine.timer().getTime()+")");
+	Lock object = new Lock();
+	object.acquire();
 	KThread.currentThread().yield();
-
+	object.release();
     }
 
     /**
@@ -51,7 +53,15 @@ public class Alarm {
 	// long wakeTime = Machine.timer().getTime() + x;
 	// while (wakeTime > Machine.timer().getTime())
 	//    KThread.yield();
-
+      Lock object = new Lock();
+      object.acquire();
+      long wakeTime = Machine.timer().getTime() + x;
+      Alarm obj = new Alarm();
+      while (Machine.timer().getTime() >= wakeTime ) {
+        obj.timerInterrupt();
+        Kthread.yield();
+      }
+      object.release();
     }
 
     /**
