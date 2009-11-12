@@ -55,13 +55,17 @@ public class Alarm {
 	//    KThread.yield();
       Lock object = new Lock();
       object.acquire();
+      System.out.println(object.isHeldByCurrentThread());
       long wakeTime = Machine.timer().getTime() + x;
+      System.out.println(Machine.timer().getTime());
+      System.out.println(wakeTime);
       Alarm obj = new Alarm();
-      while (Machine.timer().getTime() >= wakeTime ) {
+      while (Machine.timer().getTime() <= wakeTime ) {
+    	System.out.println(Machine.timer().getTime());  
         obj.timerInterrupt();
-        Kthread.yield();
       }
       object.release();
+      System.out.println("Finished");
     }
 
     /**
