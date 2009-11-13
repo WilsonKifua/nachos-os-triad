@@ -39,7 +39,11 @@ public class KThreadSimpleTest {
     newThread1.fork();
     newThread2.fork();
     
+    //join threads
+    newThread1.join();
+    newThread2.join();
+    
     KThread.yield();
-    System.out.println("**** Simple KThread testing ends ****")
+    System.out.println("**** Simple KThread testing ends ****");
   }
 }
