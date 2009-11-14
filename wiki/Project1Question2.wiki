@@ -1,16 +1,3 @@
-#summary One-sentence summary of this page.
-
-= Introduction =
-
-Add your content here.
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
 = Question #2: Reading the Code (8pts) =
 *Answer the following questions and the code in KThread.java. The goals here is for you to read the code and the comments therein.*
 
