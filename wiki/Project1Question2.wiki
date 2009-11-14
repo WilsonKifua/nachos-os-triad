@@ -1,5 +1,5 @@
 = Question #2: Reading the Code (8pts) =
-*Answer the following questions and the code in KThread.java. The goals here is for you to read the code and the comments therein.*
+_Answer the following questions and the code in KThread.java. The goals here is for you to read the code and the comments therein._
 
 *When does the Kernel get rid of the TCB for a thread that has completed? Do not answer "at line xxx" or "in method xxx", but in terms of OS events (e.g., "When a new thread is forked", "When interrupts are enabled", "When the ready queue becomes empty")*
 
