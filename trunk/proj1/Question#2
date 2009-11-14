@@ -9,15 +9,15 @@ Answer the following questions and the code in KThread.java. The goals here is f
 * Why is the sleep() method static, while the ready() method isn't?
 
 *** sleep() does not use any instance variables from the KThread class it is defined in. It can only use things that are defined as static, local variables and parameters
-.
+
 *** ready() does use the instance variable(s) from the KThread class (i.e. status)
+
 
 * Why is there that call to ready() in the fork() method?
 
-*** moves the current thread to the ready state and to the ready queue 
+*** moves the the current thread and other thread to the ready state and to the ready queue 
 
 
 * At which line in KThread.java is the CPU scheduler called to decide which KThread should be given the CPU?
 
-
-
+*** the first line in the runNextThread() method: KThread nextThread = readyQueue.nextThread(); readyQueue is the thread queue for the scheduler
