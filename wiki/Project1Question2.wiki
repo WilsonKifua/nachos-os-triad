@@ -1,3 +1,4 @@
+#labels Project-1
 = Question #2: Reading the Code (8pts) =
 _Answer the following questions and the code in KThread.java. The goals here is for you to read the code and the comments therein._
 
@@ -19,5 +20,4 @@ _Answer the following questions and the code in KThread.java. The goals here is 
 
 *At which line in KThread.java is the CPU scheduler called to decide which KThread should be given the CPU?*
 
-  the first line in the runNextThread() method: KThread nextThread = readyQueue.nextThread(); 
-  readyQueue is the thread queue for the scheduler and nextThread() gets the next KThread
+  the first line in the runNextThread() method: KThread nextThread = readyQueue.nextThread(); readyQueue is the thread queue for the scheduler and nextThread() method gets the next KThread
