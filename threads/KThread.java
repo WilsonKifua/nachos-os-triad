@@ -1,7 +1,7 @@
 package nachos.threads;
 
 import nachos.machine.*;
-
+import java.util.LinkedList;
 /**
  * A KThread is a thread that can be used to execute Nachos kernel code. Nachos
  * allows multiple threads to run concurrently.
@@ -33,7 +33,6 @@ public class KThread {
      *
      * @return	the current thread.
      */
-     Lock mutex = new Lock();
     public static KThread currentThread() {
 	Lib.assertTrue(currentThread != null);
 	return currentThread;
@@ -192,6 +191,13 @@ public class KThread {
 	Lib.assertTrue(toBeDestroyed == null);
 	toBeDestroyed = currentThread;
 
+    //if the threadlist has waiting threads
+	if(threadList.size()>0){
+	  //put thread into ready state and ready queue
+		threadList.getFirst().ready();
+		//remove thread from thread list
+		threadList.removeFirst();
+	}
 
 	currentThread.status = statusFinished;
 
@@ -274,20 +280,26 @@ public class KThread {
      * thread.
      */
     public void join() {
-      Lib.debug(dbgThread, "Joining to thread: " + toString());
-      Lib.assertTrue(this != currentThread);
-      
-      mutex.acquire();
-      int i=0;
-      if(this.status == statusFinished){
-          mutex.release();
+	Lib.debug(dbgThread, "Joining to thread: " + toString());
+
+	Lib.assertTrue(this != currentThread);
+
+      //if thread is already finished, return
+      if(this.status == statusFinished)
           return;
-      }
-      else{
-          yield();       
-      }
-      mutex.release();
+      
+      //add currentthread to list to wait for this thread to finish
+	    threadList.add(currentThread);
+      
+      //put currentthread to sleep
+ 	    boolean status = Machine.interrupt().disable();
+      currentThread.sleep();
+      Machine.interrupt().restore(status);
     }
+
+    //linked list to hold threads to be joined
+    private static LinkedList<KThread> threadList=new LinkedList<KThread>();
+
 
     /**
      * Create the idle thread. Whenever there are no threads ready to be run,
