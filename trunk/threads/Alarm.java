@@ -1,9 +1,6 @@
 package nachos.threads;
-import java.util.LinkedList;
-import nachos.machine.*;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.ArrayList;
+import nachos.machine.*;
 /**
  * Uses the hardware timer to provide preemption, and to allow threads to sleep
  * until a certain time.
@@ -32,7 +29,7 @@ public class Alarm {
   public void timerInterrupt() {
     Lib.debug(dbgAlarm,"In Interrupt Handler (time = "+Machine.timer().getTime()+")");
     //go through list of alarmThreads
-    for(int i=0;i<alarmList.size();i++){
+    for(int i=alarmList.size()-1;i>=0;i--){
 
       //if alarmThread wait time is expired
       if(alarmList.get(i).getWakeTime()<=Machine.timer().getTime()){
@@ -44,7 +41,7 @@ public class Alarm {
         //remove alarm thread from list and keep dec counter 
         //so after loop finishes, counter will inc and will be the same
         //when remove() is called, the elements are shifted left
-        alarmList.remove(i--);
+        alarmList.remove(i);
         Machine.interrupt().restore(status);
       }
     }
