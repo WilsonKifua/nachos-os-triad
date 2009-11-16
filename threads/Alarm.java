@@ -31,10 +31,19 @@ public class Alarm {
    */
   public void timerInterrupt() {
     Lib.debug(dbgAlarm,"In Interrupt Handler (time = "+Machine.timer().getTime()+")");
+    //go through list of alarmThreads
     for(int i=0;i<alarmList.size();i++){
+
+      //if alarmThread wait time is expired
       if(alarmList.get(i).getWakeTime()<=Machine.timer().getTime()){
+        
+        //put the thread in the ready state and ready queue
         boolean status = Machine.interrupt().disable();
         alarmList.get(i).getThread().ready();
+        
+        //remove alarm thread from list and keep dec counter 
+        //so after loop finishes, counter will inc and will be the same
+        //when remove() is called, the elements are shifted left
         alarmList.remove(i--);
         Machine.interrupt().restore(status);
       }
@@ -63,8 +72,10 @@ public class Alarm {
 //	  KThread.yield();
     wakeTime = Machine.timer().getTime() + x; //calc wake time
     Lib.debug(dbgAlarm,"In Wait Until (wakeTime = "+wakeTime+")");
+    
     //if wakeTime did not pass, add to
     boolean status = Machine.interrupt().disable();
+    
     if(wakeTime > Machine.timer().getTime()){
       alarmThread aThread = new alarmThread(wakeTime, KThread.currentThread());
       KThread.currentThread().sleep();
@@ -72,24 +83,29 @@ public class Alarm {
     Machine.interrupt().restore(status);
   }
   
-public class alarmThread{
-  private KThread thread;
-  private long wakeTime;
+  //alarmThread class, holds waitTime and currentThread
+  public class alarmThread{
+    private KThread thread;
+    private long wakeTime;
 
-  public alarmThread (long wt, KThread t) {
-    wakeTime = wt;
-    thread = t;
+    //alarmThread constructor
+    public alarmThread (long wt, KThread t) {
+      wakeTime = wt;
+      thread = t;
+    }
+
+    //get wake time method
+    public long getWakeTime(){
+      return wakeTime;
+    }
+
+    //get thread method
+    public KThread getThread(){
+      return thread;
+    }
   }
 
-  public long getWakeTime(){
-    return wakeTime;
-  }
-
-  public KThread getThread(){
-    return thread;
-  }
-}
-
+  //variables to use with waitUntil and timerInterrupt
   private static long wakeTime;
   private static ArrayList<alarmThread> alarmList = new ArrayList<alarmThread>();
 
