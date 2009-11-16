@@ -4,6 +4,26 @@ import nachos.machine.*;
 
 /**
  * A Tester for the Alarm class
+ *
+ * AlarmTest works because it creates threads with objects that changes the
+ * thread's wait time. Because the machine can only use one alarm at a time,
+ * you need to use the ThreadedKernel's alarm. Using the alarm in a runnable
+ * obj only affects the threads that uses it. So each thread will have their
+ * a waitTime euqal to when they forked + x. This more than one thread can 
+ * have the same wakeup time and appear almost concurrently.
+ *
+ * A bad example is having Alarms object created and running in before or 
+ * after forks, such as:
+ *
+ * new Alarm().waitUntil(100);
+ * new KThread.(Runnable obj).fork();
+ * new Alarm().waitUntil(200);
+ * new KThread.(Runnable obj).fork();
+ * 
+ * This does not work because it is affecting the current thread instead of
+ * the new created threads. Thus, the currentthread will have waitUntil(x)
+ * before running the 1st thread fork(), and the waitUntil again to run the 
+ * 2nd thread.
  */
 public class AlarmTest {
 
@@ -31,9 +51,9 @@ public class AlarmTest {
 	    System.out.println("**** Alarm testing begins ****");
 
       //wait intervals
-      long wTime1=500000;
-      long wTime2=1000000;
-      long wTime3=5000000;
+      long wTime1=50000;
+      long wTime2=300000;
+      long wTime3=1000000;
       
       //create threads for each new aTest object
 
