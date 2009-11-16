@@ -14,7 +14,6 @@ public class Communicator {
   /* Condition variables */
   public Condition isSpeaking;
   public Condition isListening;
-  public Condition isDone;
   /* Booleans indicating buffer state */
   public boolean isEmpty;
   /* holds message */
@@ -27,7 +26,6 @@ public class Communicator {
     this.mutex = new Lock();
     this.isSpeaking = new Condition(this.mutex);
     this.isListening = new Condition(this.mutex);
-    this.isDone = new Condition(this.mutex);
     this.isEmpty = true;
   }
 
@@ -46,8 +44,10 @@ public class Communicator {
     while(isEmpty != true){
       this.isSpeaking.sleep();
     }
+    //send word
     this.word = word;
     this.isEmpty = false;
+    //wake up listeners
     this.isListening.wakeAll();
     this.mutex.release();
   }
@@ -63,8 +63,10 @@ public class Communicator {
     while(isEmpty != false){
       this.isListening.sleep();
     }
+    //receive word
     int word = this.word;
     this.isEmpty = false;
+    //wake up speakers
     this.isSpeaking.wakeAll();
     this.mutex.release();
     return word;

@@ -48,9 +48,11 @@ public class Condition2 {
    * the associated lock.
    */
   public void wake() {
+    //if current thread doesn't hold the lock, then abort
     Lib.assertTrue(conditionLock.isHeldByCurrentThread());
     boolean status = Machine.interrupt().disable();
     KThread thread = waitQueue.nextThread();
+    //wakes up thread
     if (thread != null) {
       thread.ready();
     }
@@ -65,6 +67,7 @@ public class Condition2 {
   public void wakeAll() {
     Lib.assertTrue(conditionLock.isHeldByCurrentThread());
     boolean status = Machine.interrupt().disable();
+    //goes through the thread queue and wakes up all the threads
     for(KThread thread = waitQueue.nextThread(); thread != null; thread = waitQueue.nextThread()){
       thread.ready();
     }
