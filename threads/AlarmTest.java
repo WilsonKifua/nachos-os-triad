@@ -7,16 +7,23 @@ import nachos.machine.*;
  */
 public class AlarmTest {
 
+    //aTest class--waits and prints when finished waiting
     private static class aTest implements Runnable {
+        //wait time
         private long wTime;
-        private Alarm alarm = new Alarm();
+
+        //aTest constructor
         public aTest(long x) {
           wTime=x;
         }
+        
         public void run() {
-             ThreadedKernel.alarm.waitUntil(wTime);
-             System.out.println("Alarm Ringing! (time = "
-             +Machine.timer().getTime()+")");
+            //set wait time for thread
+            ThreadedKernel.alarm.waitUntil(wTime);
+            
+            //finished waiting
+            System.out.println("Alarm Ringing! (time = "
+            +Machine.timer().getTime()+")");
         }
     }
 
@@ -29,12 +36,10 @@ public class AlarmTest {
       long wTime3=5000000;
       
       //create threads for each new aTest object
-      aTest a1 = new aTest(wTime1);
-      aTest a2 = new aTest(wTime2);
-      aTest a3 = new aTest(wTime3);
-      KThread aThread1 = new KThread( a1 );
-      KThread aThread2 = new KThread( a2 );
-      KThread aThread3 = new KThread( a3 );
+
+      KThread aThread1 = new KThread( new aTest(wTime1) );
+      KThread aThread2 = new KThread( new aTest(wTime2) );
+      KThread aThread3 = new KThread( new aTest(wTime3) );
       
       //name each thread
       aThread1.setName( "aThread-1" );
@@ -45,6 +50,11 @@ public class AlarmTest {
       aThread1.fork();
       aThread2.fork();
       aThread3.fork();
+      
+      //join threads with alarms
+      aThread1.join();
+      aThread2.join();
+      aThread3.join();
       
   	  KThread.yield();
     	System.out.println("**** Alarm testing end ****");
