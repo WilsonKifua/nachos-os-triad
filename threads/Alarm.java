@@ -73,14 +73,20 @@ public class Alarm {
     wakeTime = Machine.timer().getTime() + x; //calc wake time
     Lib.debug(dbgAlarm,"In Wait Until (wakeTime = "+wakeTime+")");
     
-    //if wakeTime did not pass, add to
-    boolean status = Machine.interrupt().disable();
-    
+    //if wakeTime did not pass
     if(wakeTime > Machine.timer().getTime()){
+      boolean status = Machine.interrupt().disable();      
+      
+      //create alarmThread holding wait time and thread
       alarmThread aThread = new alarmThread(wakeTime, KThread.currentThread());
+      
+      //add to alarmThread list
+      alarmList.add(aThread);
+      
+      //put currentthread to sleep
       KThread.currentThread().sleep();
+      Machine.interrupt().restore(status);
     }
-    Machine.interrupt().restore(status);
   }
   
   //alarmThread class, holds waitTime and currentThread

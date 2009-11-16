@@ -8,7 +8,13 @@ import nachos.machine.*;
 public class AlarmTest {
 
     private static class aTest implements Runnable {
+        private long wTime;
+        private Alarm alarm = new Alarm();
+        public aTest(long x) {
+          wTime=x;
+        }
         public void run() {
+             ThreadedKernel.alarm.waitUntil(wTime);
              System.out.println("Alarm Ringing! (time = "
              +Machine.timer().getTime()+")");
         }
@@ -18,21 +24,17 @@ public class AlarmTest {
 	    System.out.println("**** Alarm testing begins ****");
 
       //wait intervals
-      long wTime1=900000;
+      long wTime1=500000;
       long wTime2=1000000;
-      long wTime3=600000;
-
-
-      //create alarm and test objects
-      Alarm aRun = new Alarm();
-      aTest aTest1 = new aTest();
-      aTest aTest2 = new aTest();
-      aTest aTest3 = new aTest();
+      long wTime3=5000000;
       
-      //create threads for each aTest object
-      KThread aThread1 = new KThread( aTest1 );
-      KThread aThread2 = new KThread( aTest2 );
-      KThread aThread3 = new KThread( aTest3 );
+      //create threads for each new aTest object
+      aTest a1 = new aTest(wTime1);
+      aTest a2 = new aTest(wTime2);
+      aTest a3 = new aTest(wTime3);
+      KThread aThread1 = new KThread( a1 );
+      KThread aThread2 = new KThread( a2 );
+      KThread aThread3 = new KThread( a3 );
       
       //name each thread
       aThread1.setName( "aThread-1" );
@@ -40,15 +42,11 @@ public class AlarmTest {
       aThread3.setName( "aThread-3" );
 
       //run threads with alarms      
-      aRun.waitUntil(wTime1);
-      aThread2.fork();
-      aRun.waitUntil(wTime2);
       aThread1.fork();
-      aRun.waitUntil(wTime3);
+      aThread2.fork();
       aThread3.fork();
       
   	  KThread.yield();
     	System.out.println("**** Alarm testing end ****");
     }
-
 }
