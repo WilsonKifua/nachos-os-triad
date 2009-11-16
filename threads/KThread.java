@@ -193,8 +193,12 @@ public class KThread {
 
     //if the threadlist has waiting threads
 	if(threadList.size()>0){
+
 	  //put thread into ready state and ready queue
+    boolean status = Machine.interrupt().disable();
 		threadList.getFirst().ready();
+    Machine.interrupt().restore(status);
+    
 		//remove thread from thread list
 		threadList.removeFirst();
 	}
