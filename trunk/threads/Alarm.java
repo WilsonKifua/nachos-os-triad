@@ -1,7 +1,9 @@
 package nachos.threads;
-
+import java.util.LinkedList;
 import nachos.machine.*;
-
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 /**
  * Uses the hardware timer to provide preemption, and to allow threads to sleep
  * until a certain time.
@@ -14,9 +16,6 @@ public class Alarm {
   * <p><b>Note</b>: Nachos will not function correctly with more than one
   * alarm.
   */
-  Lock mutex = new Lock();
-  Condition cond = new Condition(mutex);
-  long wakeTime;
   
   public Alarm() {
 	Machine.timer().setInterruptHandler(new Runnable() {
@@ -31,13 +30,16 @@ public class Alarm {
    * that should be run.
    */
   public void timerInterrupt() {
-	Lib.debug(dbgAlarm,"In Interrupt Handler (time = "+Machine.timer().getTime()+")");
-	mutex.acquire();  //mutex lock
-	if(wakeTime<=Machine.timer().getTime()){  //test if time to wake
-	  cond.wake();  //cond wake
-  }
-	mutex.release();  //mutex unlock
-  KThread.currentThread().yield();  //yield
+    Lib.debug(dbgAlarm,"In Interrupt Handler (time = "+Machine.timer().getTime()+")");
+    for(int i=0;i<alarmList.size();i++){
+      if(alarmList.get(i).getWakeTime()<=Machine.timer().getTime()){
+        boolean status = Machine.interrupt().disable();
+        alarmList.get(i).getThread().ready();
+        alarmList.remove(i--);
+        Machine.interrupt().restore(status);
+      }
+    }
+    KThread.currentThread().yield();
   }
 
   /**
@@ -59,16 +61,37 @@ public class Alarm {
 //	 long wakeTime = Machine.timer().getTime() + x;
 //	 while (wakeTime > Machine.timer().getTime())
 //	  KThread.yield();
-
-    mutex.acquire();  //mutex lock
     wakeTime = Machine.timer().getTime() + x; //calc wake time
     Lib.debug(dbgAlarm,"In Wait Until (wakeTime = "+wakeTime+")");
-    if(wakeTime > Machine.timer().getTime()){ //if not wake time 
-      cond.sleep(); //cond sleep, wait wake from timerInterrupt
-      Lib.debug(dbgAlarm,"In Wake Up: (wakeTime = "+wakeTime+")");
+    //if wakeTime did not pass, add to
+    boolean status = Machine.interrupt().disable();
+    if(wakeTime > Machine.timer().getTime()){
+      alarmThread aThread = new alarmThread(wakeTime, KThread.currentThread());
+      KThread.currentThread().sleep();
     }
-    mutex.release();  //mutex unlock
+    Machine.interrupt().restore(status);
   }
+  
+public class alarmThread{
+  private KThread thread;
+  private long wakeTime;
+
+  public alarmThread (long wt, KThread t) {
+    wakeTime = wt;
+    thread = t;
+  }
+
+  public long getWakeTime(){
+    return wakeTime;
+  }
+
+  public KThread getThread(){
+    return thread;
+  }
+}
+
+  private static long wakeTime;
+  private static ArrayList<alarmThread> alarmList = new ArrayList<alarmThread>();
 
   /**
    * Tests whether this module is working.
