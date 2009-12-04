@@ -120,10 +120,9 @@ public class PriorityScheduler extends Scheduler {
       
 	PriorityQueue(boolean transferPriority) {
 	    this.transferPriority = transferPriority;
-
 	}
 
-	/**
+        /**
          * The thread declares its intent to wait for access to the
          * "resource" guarded by this priority queue. This method is only called
          * if the thread cannot immediately obtain access.
@@ -135,15 +134,15 @@ public class PriorityScheduler extends Scheduler {
 
 	public void waitForAccess(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-	    waitQueue.add(thread);
+      waitQueue.add(thread);
 	}
 
         /* print(): Prints the priority queue, for potential debugging 
          */
 	public void print() {
-	  for (Iterator i=waitQueue.iterator(); i.hasNext(); ) {
-	    System.out.print((KThread) i.next() + " ");
-	  }
+      for (Iterator i=waitQueue.iterator(); i.hasNext(); ) {
+        System.out.print((KThread) i.next() + " ");
+      }
     }
 
         /**
@@ -153,17 +152,23 @@ public class PriorityScheduler extends Scheduler {
          */
 	public void acquire(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
+      Lib.assertTrue(waitQueue.size()==0);
 	}
-
-
 
         /**
          * Select the next thread in the ThreadQueue
          */
 	public KThread nextThread() {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-	    return waitQueue.remove();
-        
+      if(waitQueue.size()>1){
+        int tp0 = getThreadState(waitQueue.get(0)).getEffectivePriority();
+        int tp1 = getThreadState(waitQueue.get(1)).getEffectivePriority();
+        if(tp0<tp1)
+          return waitQueue.remove(0);
+        if(tp0>tp1)
+          return waitQueue.remove(1);
+      }
+      return waitQueue.remove();
 	}
 
 	/**
@@ -174,8 +179,10 @@ public class PriorityScheduler extends Scheduler {
 	 *		return.
 	 */
 	protected KThread pickNextThread() {
+          	Lib.assertTrue(Machine.interrupt().disabled());
+            Lib.assertTrue(waitQueue.size()==0);
 
-            return null;
+            return (KThread) waitQueue.getFirst();
 	}
 	
 	/**
@@ -184,6 +191,7 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public boolean transferPriority;
 	private LinkedList<KThread> waitQueue = new LinkedList<KThread>();
+  
     }
 
     /**
@@ -242,5 +250,4 @@ public class PriorityScheduler extends Scheduler {
 	protected int priority;
 	
     }
-
 }
