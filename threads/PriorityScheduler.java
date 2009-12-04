@@ -156,8 +156,8 @@ public class PriorityScheduler extends Scheduler {
          */
 	public KThread nextThread() {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-
-      return waitQueue.poll();
+      Lib.assertTrue(!waitQueue.isEmpty());
+      return waitQueue.poll();  //return next thread
 	}
 
 	/**
@@ -169,8 +169,8 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	protected KThread pickNextThread() {
         Lib.assertTrue(Machine.interrupt().disabled());
-        Lib.assertTrue(waitQueue.size()>0);
-        return waitQueue.peek();
+        Lib.assertTrue(!waitQueue.isEmpty());
+        return waitQueue.peek();  //dont change queue
 	}
 	
     /**
@@ -179,10 +179,11 @@ public class PriorityScheduler extends Scheduler {
      */
     public boolean transferPriority;
     
-    //create waitQueue
+    //create waitQueue, let pq + comparator class queue threads automatically 
+    //by priority
     private Queue<KThread> waitQueue = new java.util.PriorityQueue<KThread>(1, new comparePriority());
     
-    //compares priorities to be sorted into PQ
+    //compares priorities to for pq to sort threads
     public class comparePriority implements Comparator<KThread> {
       public int compare(KThread left, KThread right) {
           int leftP=getThreadState(left).getEffectivePriority();
