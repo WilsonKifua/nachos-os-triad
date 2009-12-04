@@ -192,7 +192,7 @@ public class KThread {
 	toBeDestroyed = currentThread;
 
     //if the threadlist has waiting threads
-	if(threadList.size()>0){
+	while(threadList.size()>0){
 
 	  //put thread into ready state and ready queue
     boolean status = Machine.interrupt().disable();

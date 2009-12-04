@@ -15,7 +15,7 @@ import java.util.*;
  * thread that has been waiting longest.
  *
  * <p>
- * Essentially, a priority scheduler gives access in a round-robin fassion to
+ * Essentially, a priority scheduler gives access in a round-robin fashion to
  * all the highest-priority threads, and ignores all other threads. This has
  * the potential to
  * starve a thread if there's always a thread waiting with higher priority.
@@ -130,7 +130,8 @@ public class PriorityScheduler extends Scheduler {
 
 	public void waitForAccess(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-      waitQueue.add(thread);
+      associatedThread = thread;
+      waitQueue.add(associatedThread);
 	}
 
         /* print(): Prints the priority queue, for potential debugging 
@@ -149,6 +150,8 @@ public class PriorityScheduler extends Scheduler {
 	public void acquire(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
       Lib.assertTrue(waitQueue.size()==0);
+      associatedThread = thread;
+      getThreadState(associatedThread).acquire(this); //for Q2
 	}
 
         /**
@@ -156,7 +159,12 @@ public class PriorityScheduler extends Scheduler {
          */
 	public KThread nextThread() {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-      Lib.assertTrue(!waitQueue.isEmpty());
+      if (waitQueue.isEmpty()){
+        associatedThread=null;
+        return null;
+      }
+      associatedThread=waitQueue.peek();
+      getThreadState(associatedThread).acquire(this); //for Q2
       return waitQueue.poll();  //return next thread
 	}
 
@@ -169,8 +177,9 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	protected KThread pickNextThread() {
         Lib.assertTrue(Machine.interrupt().disabled());
-        Lib.assertTrue(!waitQueue.isEmpty());
-        return waitQueue.peek();  //dont change queue
+        if (waitQueue.isEmpty())
+          return null;
+        return waitQueue.peek();  //dont change the queue
 	}
 	
     /**
@@ -179,8 +188,8 @@ public class PriorityScheduler extends Scheduler {
      */
     public boolean transferPriority;
     
-    //create waitQueue, let pq + comparator class queue threads automatically 
-    //by priority
+    //create waitQueue, let pq + comparator class 
+    //sort threads automatically by priority
     private Queue<KThread> waitQueue = new java.util.PriorityQueue<KThread>(1, new comparePriority());
     
     //compares priorities to for pq to sort threads
@@ -195,7 +204,7 @@ public class PriorityScheduler extends Scheduler {
           return 0;
         }
       }
-    
+    public KThread associatedThread = null;
     }
 
     /**
@@ -253,5 +262,42 @@ public class PriorityScheduler extends Scheduler {
 	protected KThread thread;
 	/** The priority of the associated thread. */
 	protected int priority;
+  
+      //need methods below? according to berkley nachos api doc
+
+      /**
+       * description from javadoc of nachos api:
+       * Called when the associated thread has acquired access to 
+       * whatever is guarded by waitQueue. This can occur either as a result 
+       * of acquire(thread) being invoked on waitQueue (where thread is the 
+       * associated thread), or as a result of nextThread() being invoked on 
+       * waitQueue.
+       *
+       * @param	waitQueue	the PriorityScheduler's PriorityQueue
+       */
+  public void acquire(PriorityQueue waitQueue) {
+        Lib.assertTrue(Machine.interrupt().disabled());
+
+        
+
+      }
+      
+      /**
+       * description from javadoc of nachos api:
+       * Called when waitForAccess(thread) (where thread is the 
+       * associated thread) is invoked on the specified priority queue. This 
+       * method is only called if the associated thread cannot immediately 
+       * obtain access.
+       *
+       * @param	waitQueue the PriorityScheduler's PriorityQueue
+       */
+      public void waitForAccess(PriorityQueue waitQueue) {
+        Lib.assertTrue(Machine.interrupt().disabled());
+        
+        
+        
+      }
+    public LinkedList<PriorityQueue> queueList = new LinkedList<PriorityQueue>();
+    public int EffectivePriority;
     }
 }
