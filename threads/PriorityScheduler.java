@@ -2,11 +2,7 @@ package nachos.threads;
 
 import nachos.machine.*;
 
-import java.util.TreeSet;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Iterator;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * A scheduler that chooses threads based on their priorities.
@@ -160,15 +156,8 @@ public class PriorityScheduler extends Scheduler {
          */
 	public KThread nextThread() {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-      if(waitQueue.size()>1){
-        int tp0 = getThreadState(waitQueue.get(0)).getEffectivePriority();
-        int tp1 = getThreadState(waitQueue.get(1)).getEffectivePriority();
-        if(tp0<tp1)
-          return waitQueue.remove(0);
-        if(tp0>tp1)
-          return waitQueue.remove(1);
-      }
-      return waitQueue.remove();
+
+      return waitQueue.poll();
 	}
 
 	/**
@@ -179,19 +168,41 @@ public class PriorityScheduler extends Scheduler {
 	 *		return.
 	 */
 	protected KThread pickNextThread() {
-          	Lib.assertTrue(Machine.interrupt().disabled());
-            Lib.assertTrue(waitQueue.size()==0);
-
-            return (KThread) waitQueue.getFirst();
+        Lib.assertTrue(Machine.interrupt().disabled());
+        Lib.assertTrue(waitQueue.size()>0);
+        KThread priorityThread=waitQueue.poll();
+        int priorityValue = -1;
+        for (KThread thread : waitQueue){
+          if (getThreadState(thread).getEffectivePriority() > priorityValue) {
+            priorityThread = thread;
+            priorityValue = getThreadState(thread).getEffectivePriority();
+          }
+        }
+        return priorityThread;
 	}
 	
-	/**
-	 * <tt>true</tt> if this queue should transfer priority from waiting
-	 * threads to the owning thread.
-	 */
-	public boolean transferPriority;
-	private LinkedList<KThread> waitQueue = new LinkedList<KThread>();
-  
+    /**
+     * <tt>true</tt> if this queue should transfer priority from waiting
+     * threads to the owning thread.
+     */
+    public boolean transferPriority;
+    
+    //waitQueue
+    private Queue<KThread> waitQueue = new java.util.PriorityQueue<KThread>(1, new comparePriority());
+    
+    //compares priorities to be sorted into PQ
+    public class comparePriority implements Comparator<KThread> {
+      public int compare(KThread left, KThread right) {
+          int leftP=getThreadState(left).getEffectivePriority();
+          int rightP=getThreadState(right).getEffectivePriority();
+          if(leftP<rightP)
+            return -1;
+          if(leftP>rightP)
+            return 1;
+          return 0;
+        }
+      }
+    
     }
 
     /**
@@ -241,13 +252,13 @@ public class PriorityScheduler extends Scheduler {
 	 * @return	the effective priority of the associated thread.
 	 */
 	public int getEffectivePriority() {
-             return this.priority;
+
+    return this.priority;
 	}
 
 	/** The thread with which this object is associated. */	   
 	protected KThread thread;
 	/** The priority of the associated thread. */
 	protected int priority;
-	
     }
 }
